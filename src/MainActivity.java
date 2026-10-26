@@ -83,7 +83,9 @@ public class MainActivity extends Activity {
     private boolean receiverRegistered;
     private BluetoothLeScanner leScanner;
 
-    private int density = PrinterProtocol.DEFAULT_DENSITY;
+    // Fresh-start selection is Dark (2); the protocol-level default
+    // (PrinterProtocol.DEFAULT_DENSITY, Medium) is not the app default.
+    private int density = 2;
     private Button[] densityButtons = new Button[3];
     private int copies = 1;
     private TextView copiesView;
@@ -104,7 +106,7 @@ public class MainActivity extends Activity {
     private CheckBox invertCheck;
     private SeekBar spacingBar;
     private TextView spacingLabel;
-    private float spacingMult = 1.15f;
+    private float spacingMult = 1.0f;
     private ImageView textPreview;
     private boolean[] textBlack;
     private int textBlackW;
@@ -549,37 +551,57 @@ public class MainActivity extends Activity {
                 }));
         refreshFontButtons();
 
+        // Two equal columns, top-aligned, so the Bold and Invert boxes
+        // start at exactly the same height. Labels never wrap; the
+        // Invert explanation is a small caption under its label.
         LinearLayout boldInvertRow = new LinearLayout(this);
         boldInvertRow.setOrientation(LinearLayout.HORIZONTAL);
+        boldInvertRow.setGravity(Gravity.TOP);
         boldInvertRow.setLayoutParams(optLabelLp);
+
+        LinearLayout boldCol = new LinearLayout(this);
+        boldCol.setOrientation(LinearLayout.VERTICAL);
+        boldCol.setLayoutParams(new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         boldCheck = new CheckBox(this);
         boldCheck.setText("Bold");
+        boldCheck.setSingleLine(true);
         boldCheck.setTextColor(TEXT);
         styleCheckBox(boldCheck);
-        boldCheck.setLayoutParams(new LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         boldCheck.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { rerenderTextIfAny(); }
         });
-        boldInvertRow.addView(boldCheck);
+        boldCol.addView(boldCheck);
+        boldInvertRow.addView(boldCol);
+
+        LinearLayout invertCol = new LinearLayout(this);
+        invertCol.setOrientation(LinearLayout.VERTICAL);
+        invertCol.setLayoutParams(new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         invertCheck = new CheckBox(this);
-        invertCheck.setText("Invert (white on black)");
+        invertCheck.setText("Invert");
+        invertCheck.setSingleLine(true);
         invertCheck.setTextColor(TEXT);
         styleCheckBox(invertCheck);
-        invertCheck.setLayoutParams(new LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         invertCheck.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { rerenderTextIfAny(); }
         });
-        boldInvertRow.addView(invertCheck);
+        invertCol.addView(invertCheck);
+        TextView invertCaption = text("white on black", 12, MUTED, false);
+        LinearLayout.LayoutParams capLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        capLp.setMargins(dp(34), 0, 0, 0);
+        invertCaption.setLayoutParams(capLp);
+        invertCol.addView(invertCaption);
+        boldInvertRow.addView(invertCol);
         textSection.addView(boldInvertRow);
 
-        spacingLabel = text("Line spacing: 1.15x", 14, MUTED, false);
+        spacingLabel = text("Line spacing: 1.00x", 14, MUTED, false);
         spacingLabel.setLayoutParams(optLabelLp);
         textSection.addView(spacingLabel);
         spacingBar = new SeekBar(this);
         spacingBar.setMax(20);
-        spacingBar.setProgress(3); // 1.0 + 3 * 0.05 = 1.15x
+        spacingBar.setProgress(0); // fresh-start default: 1.00x, thumb at minimum
         styleSeekBar(spacingBar);
         spacingBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
