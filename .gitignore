@@ -1,0 +1,15 @@
+# Signing material and built artefacts: never commit.
+*.keystore
+*.apk
+*.idsig
+*.local.md
+research/
+build/classes/
+build/dex/
+build/gen/
+build/test-classes/
+build/res.zip
+build/unsigned.apk
+build/aligned.apk
+build/icon-candidates/
+icon-preview*.png
